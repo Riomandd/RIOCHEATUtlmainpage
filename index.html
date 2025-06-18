@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RIOCHEATS PREMIUM</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #000;
+      color: #fdf6e3;
+      margin: 0;
+      padding: 20px;
+    }
+
+    #mainApp {
+      max-width: 700px;
+      margin: auto;
+      padding: 25px;
+      background: #1c1c1c;
+      border-radius: 14px;
+      border: 2px solid #ffd700;
+      box-shadow: 0 6px 18px rgba(255, 215, 0, 0.2);
+    }
+
+    .premium-title {
+      font-size: 34px;
+      font-weight: 900;
+      text-transform: uppercase;
+      background: linear-gradient(to right, #ffd700, #fff2a8, #ffcc00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: #292929;
+      padding: 18px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #c9a93d;
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.1);
+    }
+
+    .card h2 {
+      font-size: 18px;
+      color: #ffd700;
+      margin-bottom: 10px;
+    }
+
+    .stat, .result-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      border: 1px solid #ffda6d;
+      background: #1a1a1a;
+      color: #fff5cc;
+    }
+
+    .input-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .input-row input[type="number"] {
+      width: 140px;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      background: linear-gradient(to right, #1a1a1a, #2a2a2a);
+      border: 2px solid #ffd700;
+      border-radius: 10px;
+      color: #ffd700;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+      transition: all 0.3s ease-in-out;
+    }
+
+    .input-row input[type="number"]::placeholder {
+      color: #ccc585;
+      font-size: 13px;
+    }
+
+    .input-row input[type="number"]:focus {
+      outline: none;
+      border-color: #fff7b3;
+      box-shadow: 0 0 15px rgba(255, 223, 0, 0.6);
+      background: #111;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #ffd700;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease-in-out;
+    }
+
+    button:hover {
+      background-color: #ffcc00;
+    }
+
+    .warning {
+      display: none;
+      text-align: center;
+      color: #ffef94;
+      background: linear-gradient(to right, #3a3000, #665200);
+      border: 1px solid #ffd700;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+      animation: fadeInOut 3s ease-in-out forwards;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      color: #fff3af;
+      padding: 10px;
+      font-weight: bold;
+      animation: fadeInOut 1.5s ease-in-out forwards;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @media (max-width: 480px) {
+      .input-row {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .input-row input {
+        width: 80%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="mainApp">
+    <h1 class="premium-title">RIOCHEATS PREMIUM</h1>
+
+    <!-- Input Section -->
+    <div class="card">
+      <h2>PERIOD + 6 NUMBER</h2>
+      <div class="input-row">
+        <input type="number" id="periodInput" placeholder="Period No." />
+        <input type="number" id="sixDigitInput" placeholder="6-digit No." />
+      </div>
+      <button onclick="calculateSixDigit()">Show Result</button>
+      <div class="warning" id="warningBox">⚠️ Please enter exactly 6 digits.</div>
+      <div class="loading" id="loadingBox">⏳ Loading result...</div>
+    </div>
+
+    <!-- Current Result -->
+    <div class="card" id="resultCard" style="display: none;">
+      <h2>🎯 CURRENT RESULT</h2>
+      <div class="result-line"><span>Period</span><span id="periodNumber">-</span></div>
+      <div class="result-line"><span>Prediction</span><span id="bigOrSmall">-</span></div>
+      <div class="result-line" id="switchMessage" style="display: none;"><span>Change</span><span id="switchText">-</span></div>
+    </div>
+
+    <!-- Indian Time -->
+    <div class="card">
+      <h2>🕒 CURRENT TIME</h2>
+      <div class="stat"><span>Time</span><span id="currentTime">--:--:--</span></div>
+      <div class="stat"><span>Date</span><span id="currentDate">--/--/----</span></div>
+      <div class="stat"><span>Next Update In</span><span id="countdown">60s</span></div>
+    </div>
+  </div>
+
+  <script>
+    let currentPeriod = null;
+    let initialized = false;
+    let lastIncrementSecond = null;
+    let lastPrediction = null;
+
+    function showWarning(message) {
+      const box = document.getElementById("warningBox");
+      box.innerText = `⚠️ ${message}`;
+      box.style.display = "block";
+      box.style.animation = "fadeInOut 3s ease-in-out forwards";
+      setTimeout(() => box.style.display = "none", 3000);
+    }
+
+    function calculateSixDigit() {
+      const periodVal = document.getElementById("periodInput").value.trim();
+      const input = document.getElementById("sixDigitInput").value.trim();
+      const loadingBox = document.getElementById("loadingBox");
+      const resultCard = document.getElementById("resultCard");
+
+      if (!initialized) {
+        currentPeriod = parseInt(periodVal);
+        if (isNaN(currentPeriod)) {
+          showWarning("Enter valid period number.");
+          return;
+        }
+        initialized = true;
+      }
+
+      if (!/^\d{6}$/.test(input)) {
+        showWarning("Please enter exactly 6 digits.");
+        return;
+      }
+
+      loadingBox.style.display = "block";
+      resultCard.style.display = "none";
+
+      setTimeout(() => {
+        const digits = input.split('').map(Number);
+        const sum = digits.reduce((a, b) => a + b, 0);
+        const lastDigit = sum % 10;
+        const prediction = lastDigit >= 5 ? "BIG" : "SMALL";
+
+        const switchMessage = document.getElementById("switchMessage");
+        const switchText = document.getElementById("switchText");
+
+        if (lastPrediction && lastPrediction !== prediction) {
+          switchText.innerText = `${lastPrediction} → ${prediction}`;
+          switchMessage.style.display = "flex";
+        } else {
+          switchMessage.style.display = "none";
+        }
+
+        lastPrediction = prediction;
+
+        document.getElementById("periodNumber").innerText = currentPeriod;
+        document.getElementById("bigOrSmall").innerText = prediction;
+        loadingBox.style.display = "none";
+        resultCard.style.display = "block";
+      }, 1500);
+    }
+
+    function updateIndianTime() {
+      const now = new Date();
+      const indianNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+
+      document.getElementById("currentTime").innerText = indianNow.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+      document.getElementById("currentDate").innerText = indianNow.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      const sec = indianNow.getSeconds();
+      if (sec === 0 && lastIncrementSecond !== 0) {
+        if (initialized) {
+          currentPeriod++;
+          document.getElementById("periodInput").value = currentPeriod;
+        }
+      }
+      lastIncrementSecond = sec;
+    }
+
+    function updateCountdownToIndianMinute() {
+      const now = new Date();
+      const indianNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+      const seconds = indianNow.getSeconds();
+      document.getElementById("countdown").innerText = `${60 - seconds}s`;
+    }
+
+    setInterval(updateIndianTime, 1000);
+    setInterval(updateCountdownToIndianMinute, 1000);
+  </script>
+</body>
+</html>
